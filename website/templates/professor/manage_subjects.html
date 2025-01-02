@@ -1,0 +1,47 @@
+{% extends 'professor/base.html' %}
+
+{% block title %}Manage Subjects{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h1 class="mb-4">Manage Subjects</h1>
+    {% if grouped_data %}
+        <div class="accordion" id="coursesAccordion">
+            {% for course in grouped_data %}
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="heading-{{ loop.index }}">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ loop.index }}" aria-expanded="false" aria-controls="collapse-{{ loop.index }}">
+                            Course: {{ course.course_name }}
+                        </button>
+                    </h2>
+                    <div id="collapse-{{ loop.index }}" class="accordion-collapse collapse" aria-labelledby="heading-{{ loop.index }}" data-bs-parent="#coursesAccordion">
+                        <div class="accordion-body">
+                            <h5>Assigned Subjects</h5>
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Subject Name</th>
+                                        <th>Sections</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for subject in course.subjects %}
+                                        <tr>
+                                            <td>{{ subject.name }}</td>
+                                            <td>{{ subject.sections }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            No courses or subjects found for your assigned courses.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

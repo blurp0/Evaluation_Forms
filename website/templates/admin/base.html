@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Dashboard{% endblock %}</title>
+    <!-- Importing Styles -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+    <style>
+        .spinner-overlay {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999; /* Make sure it's on top */
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body id="body-pd">
+    <!-- Header Section -->
+    <header class="header" id="header">
+        <div class="header_toggle">
+            <i class='bx bx-menu' id="header-toggle"></i>
+        </div>
+        <div class="header_img"></div>
+    </header>
+
+    <!-- Sidebar Section -->
+    <div class="l-navbar" id="nav-bar">
+        <nav class="nav">
+            <div>
+                    <a href="{{ url_for('admin.home') }}" class="nav_logo">
+                        <i class='bx bx-layer nav_logo-icon'></i>
+                        <span class="nav_logo-name">Admin Dashboard</span>
+                    </a>
+
+                    <div class="nav_list">
+                    <a href="{{ url_for('admin.home') }}" class="nav_link">
+                        <i class='bx bx-grid-alt nav_icon'></i>
+                        <span class="nav_logo-name">Overview</span>
+                    </a>
+
+                    <!-- Manage Students -->
+                    <a href="{{ url_for('admin.manage_students') }}" class="nav_link">
+                        <i class='bx bx-user nav_icon'></i>
+                        <span class="nav_name">Manage Students</span>
+                    </a>
+
+                    <!-- Manage Professors -->
+                    <a href="{{ url_for('admin.load_professors') }}" class="nav_link">
+                        <i class='bx bx-chalkboard nav_icon'></i>
+                        <span class="nav_name">Manage Professors</span>
+                    </a>
+
+                    <!-- Manage Course -->
+                    <a href="{{ url_for('admin.manage_courses') }}" class="nav_link">
+                        <i class='bx bx-book nav_icon'></i>
+                        <span class="nav_name">Manage Courses</span>
+                    </a>
+
+                    <a href="{{ url_for('admin.manage_categories') }}" class="nav_link">
+                        <i class='bx bx-category nav_icon'></i>
+                        <span class="nav_name">Manage Categories</span>
+                    </a>
+
+                    <!-- Collapsible Parent for Forms -->
+                    <a href="#formsCollapse" class="nav_link" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="formsCollapse">
+                        <i class='bx bx-file nav_icon'></i>
+                        <span class="nav_name">Manage Evaluation Forms</span>
+                    </a>
+                    <div class="collapse" id="formsCollapse">
+                        <div class="nav_list">
+                            <a href="{{ url_for('admin.manage_forms') }}" class="nav_link">
+                                <i class='bx bx-file nav_icon'></i>
+                                <span class="nav_name">Manage Forms</span>
+                            </a>
+                            <a href="{{ url_for('admin.distribute_forms') }}" class="nav_link">
+                                <i class='bx bx-send nav_icon'></i>
+                                <span class="nav_name">Distribute Forms</span>
+                            </a>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <a href="#" class="nav_link">
+                <i class='bx bx-log-out nav_icon'></i>
+                <span class="nav_name">Sign Out</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Spinner Overlay (Hidden by default) -->
+    <div id="spinner-overlay" class="spinner-overlay">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Main Content Section -->
+    <div class="height-100 bg-light">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/boxicons@latest/js/boxicons.min.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function (event) {
+        const showNavbar = (toggleId, navId, bodyId, headerId) => {
+            const toggle = document.getElementById(toggleId),
+                nav = document.getElementById(navId),
+                bodypd = document.getElementById(bodyId),
+                headerpd = document.getElementById(headerId);
+
+            // Restore the navbar state from localStorage
+            const isNavbarOpen = localStorage.getItem("navbar-open") === "true";
+            if (isNavbarOpen) {
+                nav.classList.add("show");
+                toggle.classList.add("bx-x");
+                bodypd.classList.add("body-pd");
+                headerpd.classList.add("body-pd");
+            }
+
+            // Validate that all variables exist
+            if (toggle && nav && bodypd && headerpd) {
+                toggle.addEventListener("click", () => {
+                    // Toggle navbar visibility
+                    nav.classList.toggle("show");
+                    toggle.classList.toggle("bx-x");
+                    bodypd.classList.toggle("body-pd");
+                    headerpd.classList.toggle("body-pd");
+
+                    // Save the current state to localStorage
+                    const isOpen = nav.classList.contains("show");
+                    localStorage.setItem("navbar-open", isOpen);
+                });
+            }
+        };
+
+        showNavbar("header-toggle", "nav-bar", "body-pd", "header");
+
+        /*===== LINK ACTIVE =====*/
+        const linkColor = document.querySelectorAll(".nav_link");
+        const dashboardLink = document.querySelector(".nav_link[href='{{ url_for('admin.home') }}']");
+        const logoLink = document.querySelector(".nav_logo");
+
+        // Restore the active link from localStorage
+        const activeLinkHref = localStorage.getItem("active-nav-link");
+        if (activeLinkHref) {
+            linkColor.forEach((link) => {
+                link.classList.remove("active");
+                if (link.getAttribute("href") === activeLinkHref) {
+                    link.classList.add("active");
+                }
+            });
+        }
+
+        // Add click event to set the active link
+        function colorLink() {
+            if (linkColor) {
+                linkColor.forEach((l) => l.classList.remove("active"));
+                this.classList.add("active");
+
+                // Save the active link's href to localStorage
+                const activeHref = this.getAttribute("href");
+                localStorage.setItem("active-nav-link", activeHref);
+            }
+        }
+        linkColor.forEach((l) => l.addEventListener("click", colorLink));
+
+        // Make Dashboard active when clicking the logo
+        if (logoLink) {
+            logoLink.addEventListener("click", (e) => {
+                e.preventDefault(); // Prevent default link action
+                linkColor.forEach((link) => link.classList.remove("active"));
+                if (dashboardLink) {
+                    dashboardLink.classList.add("active");
+                    localStorage.setItem("active-nav-link", dashboardLink.getAttribute("href"));
+                }
+                // Redirect to the dashboard page
+                window.location.href = '{{ url_for('admin.home') }}';
+            });
+        }
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Function to persist collapse state
+        function persistCollapseState() {
+            const collapsibles = document.querySelectorAll('[data-bs-toggle="collapse"]');
+            collapsibles.forEach(collapseTrigger => {
+                const targetId = collapseTrigger.getAttribute("href") || collapseTrigger.dataset.bsTarget;
+                const targetElement = document.querySelector(targetId);
+
+                if (targetElement) {
+                    // Add event listener to track toggle events
+                    targetElement.addEventListener('shown.bs.collapse', () => {
+                        localStorage.setItem(targetId, "open");
+                    });
+
+                    targetElement.addEventListener('hidden.bs.collapse', () => {
+                        localStorage.setItem(targetId, "closed");
+                    });
+
+                    // Restore state from localStorage
+                    const savedState = localStorage.getItem(targetId);
+                    if (savedState === "open") {
+                        const bsCollapse = new bootstrap.Collapse(targetElement, {
+                            toggle: true, // Ensures it opens if closed
+                        });
+                    }
+                }
+            });
+        }
+
+        // Call the function to persist collapse states
+        persistCollapseState();
+
+        // Show spinner on non-collapse links
+        const spinnerOverlay = document.getElementById('spinner-overlay');
+        document.querySelectorAll('.nav_link').forEach(link => {
+            link.addEventListener('click', function (event) {
+                if (!link.closest('[data-bs-toggle="collapse"]')) {
+                    spinnerOverlay.style.display = 'flex';
+                }
+            });
+        });
+
+        // Hide spinner after page loads
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                spinnerOverlay.style.display = 'none';
+            }, 500);
+        });
+    });
+</script>
+
+</body>
+</html>

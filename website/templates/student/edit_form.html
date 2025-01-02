@@ -1,0 +1,27 @@
+{% extends "student/base.html" %}
+{% block subtitle %}Edit Form: {{ form.title }}{% endblock %}
+{% block content %}
+
+<form action="{{ url_for('student.edit_form', form_id=form.id) }}" method="POST">
+    <label for="title">Title:</label>
+    <input type="text" id="title" name="title" value="{{ form.title }}" required>
+
+    <label for="description">Description:</label>
+    <textarea id="description" name="description" required>{{ form.description }}</textarea>
+
+    <div class="form-questions">
+        <h4>Questions</h4>
+        {% for question in form.questions %}
+            <div class="question-item">
+                <label>Question:</label>
+                <input type="text" name="questions[{{ loop.index0 }}][question]" value="{{ question.question }}" required>
+                <label>Answer:</label>
+                <textarea name="questions[{{ loop.index0 }}][answer]">{{ question.answer }}</textarea>
+            </div>
+        {% endfor %}
+    </div>
+
+    <button type="submit">Save Changes</button>
+    <button type="button" onclick="window.history.back()">Cancel</button>
+</form>
+{% endblock %}

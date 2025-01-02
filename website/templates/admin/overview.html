@@ -1,0 +1,211 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Admin Overview{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h1>Admin Overview</h1>
+
+  <!-- Row 1: Student Count, Professor Count, and Top 1 Overall -->
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="card shadow-sm text-center mb-3">
+        <div class="card-body">
+          <h5 class="card-title text-primary">Total Students</h5>
+          <p class="display-4 text-primary">{{ student_count }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card shadow-sm text-center mb-3">
+        <div class="card-body">
+          <h5 class="card-title text-success">Total Professors</h5>
+          <p class="display-4 text-success">{{ professor_count }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card shadow-sm text-center mb-3">
+        <div class="card-body">
+          {% if top_professor_overall %}
+            <h5 class="card-title text-success">Top 1 Overall</h5>
+            <p class="display-4 text-warning" style="font-size: 2.5rem; font-weight: bold;">
+              {{ top_professor_overall.overall_performance }}
+            </p>
+            <p class="card-title text-primary">
+              {{ top_professor_overall.first_name }} {{ top_professor_overall.last_name }}
+            </p>
+          {% else %}
+            <p>No top professor available.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 2: Form Status Overview (Pie Chart) and Course Performance (Bar Chart) -->
+  <div class="row g-4">
+    <!-- Pie Chart -->
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Form Status Overview</h5>
+        </div>
+        <div class="card-body d-flex flex-column justify-content-center">
+          <div style="max-width: 300px; margin: auto;">
+            <canvas id="formStatusChart" style="height: 300px;"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bar Chart with Category Acronyms Legend Inside -->
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Department Performance</h5>
+        </div>
+        <div class="card-body">
+          <canvas id="coursePerformanceChart" style="height: 300px;"></canvas>
+        </div>
+        <!-- Smaller legend inside the card -->
+        <div class="d-flex justify-content-center flex-wrap" style="font-size: 0.8rem; padding: 5px;">
+          {% for acronym, full_name in acronyms_and_full_names %}
+            <div class="p-1" style="margin: 0 5px;">
+              <strong>{{ full_name }}:</strong> {{ acronym }}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+
+  // Form Status Pie Chart
+  var ctxFormStatus = document.getElementById('formStatusChart').getContext('2d');
+  var formStatusChart = new Chart(ctxFormStatus, {
+    type: 'pie',
+    data: {
+      labels: ['Pending', 'Completed', 'Missing'],
+      datasets: [{
+        label: 'Form Status Distribution',
+        data: [{{ pending_count }}, {{ completed_count }}, {{ missing_count }}],
+        backgroundColor: ['#FFCC00', '#4CAF50', '#FF5733'],
+        borderColor: ['#FFCC00', '#4CAF50', '#FF5733'],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: {
+            generateLabels: function(chart) {
+              var original = Chart.overrides.pie.plugins.legend.labels.generateLabels;
+              var labels = original.call(this, chart);
+
+              labels.forEach(function(label, index) {
+                var dataset = chart.data.datasets[0];
+                var value = dataset.data[index];
+                label.text = label.text + ': ' + value; // Append the value to the label
+              });
+
+              return labels;
+            }
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(tooltipItem) {
+              var percentage = Math.round(tooltipItem.raw / {{ pending_count + completed_count + missing_count }} * 100);
+              return tooltipItem.label + ': ' + tooltipItem.raw + ' (' + percentage + '%)';
+            }
+          }
+        }
+      }
+    }
+  });
+
+  // Mapping Acronyms to Full Names (generated dynamically from the backend)
+const acronymToFullName = {
+    {% for full_name, acronym in acronyms_and_full_names %}
+      '{{ acronym }}': '{{ full_name }}',
+    {% endfor %}
+};
+
+// Course Performance Bar Chart
+var ctxCoursePerformance = document.getElementById('coursePerformanceChart').getContext('2d');
+var coursePerformanceChart = new Chart(ctxCoursePerformance, {
+  type: 'bar',  // Bar Chart
+  data: {
+    labels: {{ course_labels | tojson }},  // Acronyms for X-axis labels
+    datasets: [
+      {% for course_name, performance_data in course_performance_data.items() %}
+        {
+          label: '{{ course_name }}',  // Full name in the legend
+          data: {{ performance_data.values() | list | tojson }},
+          backgroundColor: getRandomColor(),
+          borderColor: getRandomColor(),
+          borderWidth: 1
+        }
+        {% if not loop.last %},{% endif %}
+      {% endfor %}
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: {
+        ticks: {
+          maxRotation: 45, // Rotate labels by 45 degrees for readability
+          minRotation: 30  // Minimum rotation angle
+        }
+      },
+      y: {
+        min: 1, // Set the minimum value of the Y-axis to 1
+        max: 5, // Set the maximum value of the Y-axis to 5
+        ticks: {
+          stepSize: 0.5, // Set step size for clarity
+          callback: function(value) {
+            return value.toFixed(1); // Display ticks with one decimal place
+          }
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        position: 'top', // Full course names in the legend
+      },
+      tooltip: {
+        callbacks: {
+          label: function(tooltipItem) {
+            var acronym = tooltipItem.label;
+            var fullName = acronymToFullName[acronym] || acronym; // Look up full name for acronym
+            return fullName + ': ' + tooltipItem.raw; // Show full name with the value
+          }
+        }
+      }
+    }
+  }
+});
+
+  // Function to generate random colors for each course bar
+  function getRandomColor() {
+    var letters = '0123456789ABCDEF'.split('');
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  }
+</script>
+
+{% endblock %}

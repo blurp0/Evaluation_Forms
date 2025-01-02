@@ -1,0 +1,131 @@
+{% extends "admin/base.html" %}
+
+{% block subtitle %}Distribute Evaluation Forms{% endblock %}
+
+{% block content %}
+<h1>Distribute Evaluation Forms</h1>
+
+<form method="POST">
+    <!-- Select Forms -->
+    <div class="form-group">
+        <label for="form_ids">Select Evaluation Forms:</label>
+        <select id="form_ids" name="form_ids" class="form-control" multiple required>
+            {% for form in forms %}
+                <option value="{{ form.id }}">{{ form.title }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Select Course -->
+    <div class="form-group">
+        <label for="course_id">Select Course:</label>
+        <select id="course_id" name="course_id" class="form-control" required>
+            <option value="">-- Select a Course --</option>
+            {% for course in courses %}
+                <option value="{{ course.id }}">{{ course.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Select Professors -->
+    <div class="form-group">
+        <label for="professor_ids">Select Professors:</label>
+        <select id="professor_ids" name="professor_ids" class="form-control" multiple required>
+            <option value="" disabled>-- Select a Course First --</option>
+        </select>
+    </div>
+
+    <!-- Select Subjects -->
+    <div class="form-group">
+        <label for="subject_ids">Select Subjects:</label>
+        <select id="subject_ids" name="subject_ids" class="form-control" multiple required>
+            <option value="" disabled>-- Select a Course First --</option>
+        </select>
+    </div>
+
+    <!-- Select Sections -->
+    <div class="form-group">
+        <label for="section_ids">Select Sections:</label>
+        <select id="section_ids" name="section_ids" class="form-control" multiple required>
+            <option value="" disabled>-- Select a Course First --</option>
+        </select>
+    </div>
+
+    <!-- Set Deadline -->
+    <div class="form-group">
+        <label for="deadline">Set Deadline:</label>
+        <input type="date" id="deadline" name="deadline" class="form-control" required>
+    </div>
+
+    <button type="submit" class="btn btn-primary" id="submit-button" disabled>Distribute Forms</button>
+</form>
+
+<script>
+    const submitButton = document.getElementById('submit-button');
+
+    // Dynamically populate professors, subjects, and sections based on course selection
+    document.getElementById('course_id').addEventListener('change', function() {
+        const courseId = this.value;
+        if (courseId) {
+            // Show loading placeholders
+            updateDropdown('professor_ids', [{ id: '', name: '-- Loading... --' }]);
+            updateDropdown('subject_ids', [{ id: '', name: '-- Loading... --' }]);
+            updateDropdown('section_ids', [{ id: '', name: '-- Loading... --' }]);
+
+            fetch(`/admin/get_course_details/${courseId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                        return;
+                    }
+                    updateDropdown('professor_ids', data.professors.map(prof => ({
+                        id: prof.id,
+                        name: `${prof.first_name} ${prof.last_name}`
+                    })));
+                    updateDropdown('subject_ids', data.subjects.map(subj => ({
+                        id: subj.id,
+                        name: subj.name
+                    })));
+                    updateDropdown('section_ids', data.sections.map(sec => ({
+                        id: sec.id,
+                        name: sec.name
+                    })));
+                    validateForm(); // Check form validation after update
+                })
+                .catch(error => {
+                    alert('Failed to fetch course details. Please try again.');
+                    console.error('Error fetching course details:', error);
+                });
+        }
+    });
+
+    // Helper function to populate dropdowns
+    function updateDropdown(dropdownId, items) {
+        const dropdown = document.getElementById(dropdownId);
+        dropdown.innerHTML = '';
+        items.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.id;
+            option.textContent = item.name;
+            dropdown.appendChild(option);
+        });
+    }
+
+    // Validate the form dynamically
+    function validateForm() {
+        const formIds = document.getElementById('form_ids').value;
+        const courseId = document.getElementById('course_id').value;
+        const professors = document.getElementById('professor_ids').options.length > 0;
+        const subjects = document.getElementById('subject_ids').options.length > 0;
+        const sections = document.getElementById('section_ids').options.length > 0;
+        const deadline = document.getElementById('deadline').value;
+
+        submitButton.disabled = !(formIds && courseId && professors && subjects && sections && deadline);
+    }
+
+    // Add event listeners for real-time validation
+    document.querySelectorAll('select, input').forEach(el => el.addEventListener('change', validateForm));
+</script>
+
+{% endblock %}

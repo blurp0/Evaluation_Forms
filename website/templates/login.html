@@ -1,0 +1,70 @@
+{% extends "index.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+  <div class="custom-login-bg">
+    <div class="auth-container"> <!-- Using 'auth-container' for consistent styling -->
+      <form method="POST" action="{{ url_for('auth.login') }}">
+
+        <!-- Role Dropdown -->
+        <div class="input-group mb-3" id="role-group">
+          <select class="form-select custom-select" name="role" id="role" required>
+              <option value="" disabled selected>Select your role</option>
+              <option value="student">Student</option>
+              <option value="professor">Professor</option>
+          </select>
+        </div>
+
+        <!-- Identifier (Student ID or Professor Email) -->
+        <div class="input-group mb-3" id="identifier-group">
+          <input type="text" id="identifier" name="identifier" class="form-control" placeholder="Select your role first" aria-label="Identifier" aria-describedby="identifier-addon" required disabled>
+        </div>
+
+        <!-- Password -->
+        <div class="input-group mb-3" id="password-group">
+          <input type="password" id="password" name="password" class="form-control" placeholder="Select your role first" aria-label="Password" aria-describedby="password-addon" required disabled>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary w-100" disabled>Login</button>
+
+        <!-- Additional Links -->
+        <div class="text-center mt-3">
+          <a href="{{ url_for('auth.register') }}">Register</a> |
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('role').addEventListener('change', function() {
+        var identifierInput = document.getElementById('identifier');
+        var passwordInput = document.getElementById('password');
+        var submitButton = document.querySelector('button[type="submit"]');
+
+        // Enable identifier and password fields when a role is selected
+        if (this.value) {
+            identifierInput.disabled = false;
+            passwordInput.disabled = false;
+            submitButton.disabled = false;
+
+            // Update placeholder based on selected role
+            if (this.value === 'student') {
+                identifierInput.placeholder = 'Student ID';
+                 passwordInput.placeholder = 'Password';
+            } else if (this.value === 'professor') {
+                identifierInput.placeholder = 'Email';
+                passwordInput.placeholder = 'Password';
+            }
+        } else {
+            // Disable fields and set placeholder when no role is selected
+            identifierInput.disabled = true;
+            passwordInput.disabled = true;
+            submitButton.disabled = true;
+            identifierInput.placeholder = 'Select your role first';
+            passwordInput.placeholder = 'Select your role first' ;
+        }
+    });
+  </script>
+{% endblock %}

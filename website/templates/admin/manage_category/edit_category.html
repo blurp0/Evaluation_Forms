@@ -1,0 +1,61 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<h1>Edit Categories</h1>
+
+<form method="POST">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for category in categories %}
+            <tr>
+                <td>{{ category.id }}</td>
+                <td>
+                    <input type="hidden" name="category_id[]" value="{{ category.id }}">
+                    <input type="text" name="category_name[]" class="form-control" value="{{ category.name }}" required>
+                </td>
+            </tr>
+            {% endfor %}
+            <!-- New categories input fields -->
+            <tbody id="new-category-container">
+                <!-- New rows will be added here -->
+            </tbody>
+        </tbody>
+    </table>
+<button id="add-category" class="btn btn-primary mt-3">Add New Category</button>
+    <button type="submit" class="btn btn-success">Save Changes</button>
+</form>
+
+<script>
+    // Function to add a new row for category input field
+    document.getElementById('add-category').addEventListener('click', function() {
+        // Get the container where new rows will be added
+        let container = document.getElementById('new-category-container');
+
+        // Create a new row with input field for category name and a remove button
+        let newRow = document.createElement('tr');
+        newRow.innerHTML = `
+            <td></td>
+            <td>
+                <input type="text" name="new_category_name[]" class="form-control" placeholder="New category name" required>
+                <button type="button" class="btn btn-danger btn-sm mt-2" onclick="removeCategory(this)">X</button>
+            </td>
+        `;
+
+        // Append the new row to the container
+        container.appendChild(newRow);
+    });
+
+    // Function to remove a category input row when the "X" button is clicked
+    function removeCategory(button) {
+        let row = button.closest('tr');  // Find the closest row to the clicked button
+        row.remove();  // Remove the row from the DOM
+    }
+</script>
+
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "student/base.html" %}
+
+{% block subtitle %}Overview{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4" style="color: black;">{{ student_name }}'s Dashboard</h1>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4 d-flex justify-content-center align-items-stretch">
+
+        <!-- Completed Evaluations Card -->
+        <div class="col">
+            <div class="card" style="background-color: var(--grey-color); color: white; height: 100%;">
+                <div class="card-header text-center" style="background-color: var(--grey-color)); color: white;">
+                    <h3>Completed Evaluations</h3>
+                </div>
+                <div class="card-body text-center" style="background-color: var(--white-color); color: #d9534f;">
+                    <h4 class="card-title" style="color: black;">
+                        <span class="badge" style="background-color: green; color: white;">{{ completed_evaluations }}</span>
+                        Completed Form</h4>
+                    <a href="{{ url_for('student.completed_forms') }}" class="btn mt-3" style="background-color: var(--first-color); color: white;">View Completed Forms</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Evaluations Card -->
+<div class="col">
+    <div class="card" style="background-color: var(--grey-color); color: white; height: 100%;">
+        <div class="card-header text-center" style="background-color: var(--grey-color); color: white;">
+            <h3>Pending Evaluations</h3>
+        </div>
+        <div class="card-body text-center" style="background-color: var(--white-color); color: #d9534f;">
+            <h4 class="card-title" style="color: black;">
+                <span class="badge" style="background-color: orange; color: white;">{{ pending_evaluations }}</span>
+                Pending Form
+            </h4>
+            <a href="{{ url_for('student.pending_forms') }}" class="btn mt-3" style="background-color: var(--first-color); color: white;">View Pending Forms</a>
+        </div>
+    </div>
+</div>
+
+        <!-- Missing Evaluations Card -->
+        <div class="col">
+          <div class="card" style="color: white; height: 100%;">
+                <div class="card-header text-center" style="background-color: var(--grey-color); color: white;">
+                    <h3>Missing Evaluations</h3>
+                </div>
+                <div class="card-body text-center" style="background-color: var(--white-color); color: #d9534f;">
+                <h4 class="card-title" style="color: black;">
+                    <span class="badge" style="background-color: red; color: white;">{{ missing_evaluations }}</span>
+                    Missing Form
+                </h4>
+                    <a href="{{ url_for('student.missing_forms') }}" class="btn mt-3" style="background-color: var(--first-color); color: white;">View Missing Forms</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Tooltip for evaluation stats -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Enable tooltips for all elements with the 'data-bs-toggle="tooltip"'
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+
+{% endblock %}

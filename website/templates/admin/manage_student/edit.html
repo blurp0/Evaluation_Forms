@@ -1,0 +1,43 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<h2>Edit Student</h2>
+
+<form method="POST" action="{{ url_for('admin.edit_student', student_id=student.id) }}">
+    <div class="form-group">
+        <label for="first_name">First Name</label>
+        <input type="text" id="first_name" name="first_name" class="form-control" value="{{ student.first_name }}" required>
+    </div>
+
+    <div class="form-group">
+        <label for="last_name">Last Name</label>
+        <input type="text" id="last_name" name="last_name" class="form-control" value="{{ student.last_name }}" required>
+    </div>
+
+    <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" class="form-control" value="{{ student.email }}" required>
+    </div>
+
+    <div class="form-group">
+        <label for="age">Age</label>
+        <input type="number" id="age" name="age" class="form-control" value="{{ student.age if student.age else '' }}">
+    </div>
+
+    <div class="form-group">
+        <label for="section">Section</label>
+        <select id="section" name="section_id" class="form-control">
+            <option value="">Select a Section</option>
+            {% for section in sections %}
+                <option value="{{ section.id }}" {% if section.id == student.section_id %}selected{% endif %}>
+                    {{ section.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+    <a href="{{ url_for('admin.view_student', student_id=student.id) }}" class="btn btn-secondary">Cancel</a>
+</form>
+
+{% endblock %}

@@ -1,0 +1,284 @@
+{% extends "professor/base.html" %}
+
+{% block title %}Performance Overview{% endblock %}
+
+{% block content %}
+<h2>Performance Overview</h2>
+
+<!-- New Row: Total Average Grade -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm text-center mb-3">
+            <div class="card-body">
+                <h5 class="card-title text-info">Total Average Grade</h5>
+                <p class="display-4 text-info" style="font-size: 2.5rem; font-weight: bold;">
+                    {% if total_average_grade is not none %}
+                    {{ total_average_grade | round(2) }}
+                    {% else %}
+                    N/A
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col-md-6 d-flex">
+        <div class="card shadow-sm text-center mb-3 w-100">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title text-info">Category Performance Summary</h5>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Average Grade</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% set category_total = 0 %}
+                        {% set category_count = 0 %}
+                        {% set colors = ['rgba(54, 162, 235, 0.2)', 'rgba(255, 99, 132, 0.2)', 'rgba(75, 192, 192, 0.2)', 'rgba(153, 102, 255, 0.2)', 'rgba(255, 159, 64, 0.2)'] %}
+                        {% set color_index = 0 %}
+                        {% for category, grades in category_performance.items() %}
+                            {% set avg_grade = grades | sum / grades | length %}
+                            <tr>
+                                <td class="text-start" style="padding-left: 30px;"><strong>{{ category }}</strong></td>
+                                <td>{{ avg_grade | round(2) }}</td>
+                            </tr>
+                            {% set category_total = category_total + avg_grade %}
+                            {% set category_count = category_count + 1 %}
+                            {% set color_index = (color_index + 1) % colors|length %}
+                        {% endfor %}
+                        <tr class="table-success">
+                            <td><strong>Overall Category Average</strong></td>
+                            <td colspan="2">
+                                {% if overall_category_average is not none %}
+                                    {{ overall_category_average | round(2) }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 d-flex">
+        <div class="card shadow-sm text-center mb-3 w-100">
+            <div class="card-body d-flex flex-column justify-content-between">
+                <h5 class="card-title text-info">Category Performance Graph</h5>
+                <div id="legendContainer" style="padding-left: 40px;"></div>
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Row for Subject Performance with Graph on the Left and Card Summary on the Right -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm text-center mb-3">
+            <div class="card-body">
+                <h5 class="card-title text-info">Subject Performance Summary</h5>
+                <ul>
+                    {% set subject_total = 0 %}
+                    {% set subject_count = 0 %}
+                    {% for subject_id, grade in subject_performance.items() %}
+                        <li><strong>{{ subject_names[subject_id] }}:</strong> {{ grade | round(2) }}</li>
+                        {% set subject_total = subject_total + grade %}
+                        {% set subject_count = subject_count + 1 %}
+                    {% endfor %}
+                    <li><strong>Overall Average:</strong>
+                    {% if subject_count > 0 and subject_total != 0 %}
+                        {{ subject_total / subject_count | round(2) }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm text-center mb-3">
+            <div class="card-body">
+                <h5 class="card-title text-info">Subject Performance Graph</h5>
+                <canvas id="subjectChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Accordion for Courses -->
+<div class="accordion" id="courseAccordion">
+    {% for course, sections in data.items() %}
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingCourse{{ loop.index }}">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapseCourse{{ loop.index }}" aria-expanded="false"
+                    aria-controls="collapseCourse{{ loop.index }}">
+                <strong>Course: </strong> {{ course }}
+            </button>
+        </h2>
+        <div id="collapseCourse{{ loop.index }}" class="accordion-collapse collapse"
+             aria-labelledby="headingCourse{{ loop.index }}"
+             data-bs-parent="#courseAccordion">
+            <div class="accordion-body">
+                <div class="accordion" id="sectionAccordion{{ loop.index }}">
+                    {% for section, subjects in sections.items() %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingSection{{ loop.index }}{{ loop.index0 }}">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseSection{{ loop.index }}{{ loop.index0 }}" aria-expanded="false"
+                                    aria-controls="collapseSection{{ loop.index }}{{ loop.index0 }}">
+                                <strong>Section: </strong> {{ section }}
+                            </button>
+                        </h2>
+                        <div id="collapseSection{{ loop.index }}{{ loop.index0 }}" class="accordion-collapse collapse"
+                             aria-labelledby="headingSection{{ loop.index }}{{ loop.index0 }}"
+                             data-bs-parent="#sectionAccordion{{ loop.index }}">
+                            <div class="accordion-body">
+                                <ul class="list-group">
+                                    {% for subject in subjects %}
+                                    <li class="list-group-item">
+                                        <strong>{{ subject.subject_name }}</strong>
+                                        {% if subject.performance %}
+                                        <table class="table table-sm mt-2">
+                                            <thead>
+                                                <tr>
+                                                    <th>Category</th>
+                                                    <th>Average Grade</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for category in subject.performance %}
+                                                <tr>
+                                                    <td>{{ category.category_name }}</td>
+                                                    <td>{{ category.average_grade | round(2) }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                                <!-- Display Overall Performance -->
+                                                <tr class="table-success">
+                                                    <td><strong>Overall Performance</strong></td>
+                                                    <td><strong>{{ subject.overall_performance | round(2) }}</strong></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        {% else %}
+                                        <p class="text-muted">No performance data available for this subject.</p>
+                                        {% endif %}
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Category Performance Chart
+var categoryLabels = {{ category_labels | tojson }}; // This will be empty now
+var categoryData = {{ category_data | tojson }}; // The data stays the same
+var categoryColors = ['rgba(54, 162, 235, 0.2)', 'rgba(255, 99, 132, 0.2)', 'rgba(75, 192, 192, 0.2)', 'rgba(153, 102, 255, 0.2)', 'rgba(255, 159, 64, 0.2)']; // Predefined colors
+
+var ctxCategory = document.getElementById('categoryChart').getContext('2d');
+var categoryChart = new Chart(ctxCategory, {
+    type: 'bar',
+    data: {
+        labels: categoryLabels, // Empty or index-based labels
+        datasets: [{
+            label: 'Average Grade per Category',  // This can still be kept, or removed as needed
+            data: categoryData,
+            backgroundColor: categoryColors,  // Color coding for each category
+            borderColor: categoryColors,  // Border colors matching the background
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            x: {
+                ticks: {
+                    display: false // Hides the x-axis labels
+                }
+            },
+            y: {
+                beginAtZero: true,
+                max: 5  // Limit the maximum value of the y-axis to 5
+            }
+        },
+        plugins: {
+            legend: {
+                display: false // Hide the legend completely
+            }
+        }
+    }
+});
+
+
+// Horizontal legend generation
+var legendContainer = document.getElementById('legendContainer');
+legendContainer.style.display = 'flex';
+legendContainer.style.justifyContent = 'left';
+legendContainer.style.flexWrap = 'wrap'; // Allow wrapping if there are many items
+
+categoryLabels.forEach((category, index) => {
+    var legendItem = document.createElement('div');
+    legendItem.style.display = 'flex';
+    legendItem.style.alignItems = 'center';
+    legendItem.style.marginRight = '10px';
+    legendItem.style.marginBottom = '5px';
+
+    var colorBox = document.createElement('span');
+    colorBox.style.backgroundColor = categoryChart.data.datasets[0].backgroundColor[index];
+    colorBox.style.width = '12px';
+    colorBox.style.height = '12px';
+    colorBox.style.marginRight = '10px';
+
+    var label = document.createTextNode(category);
+
+    legendItem.appendChild(colorBox);
+    legendItem.appendChild(label);
+    legendContainer.appendChild(legendItem);
+});
+
+
+    // Subject Performance Chart
+    var subjectLabels = {{ subject_labels | tojson }};
+    var subjectData = {{ subject_data | tojson }};
+    var ctxSubject = document.getElementById('subjectChart').getContext('2d');
+    var subjectChart = new Chart(ctxSubject, {
+        type: 'bar',
+        data: {
+            labels: subjectLabels,
+            datasets: [{
+                label: 'Average Grade per Subject',
+                data: subjectData,
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,139 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<h2>Manage Students</h2>
+
+<!-- Filter Dropdowns -->
+<div class="form-group">
+    <!-- Course Dropdown -->
+    <label for="course">Course</label>
+    <select id="course" name="course_id" class="form-control" onchange="updateSections()">
+        <option value="">Select a Course</option>
+        {% for course in courses %}
+            <option value="{{ course.id }}" {% if course.id == selected_course_id %}selected{% endif %}>
+                {{ course.name }}
+            </option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="form-group">
+    <!-- Section Dropdown -->
+    <label for="section">Section</label>
+    <select id="section" name="section_id" class="form-control" onchange="fetchStudents()">
+        <option value="">Select a Section</option>
+        {% for section in sections %}
+            <option value="{{ section.id }}" {% if section.id == selected_section_id %}selected{% endif %}>
+                {{ section.name }}
+            </option>
+        {% endfor %}
+    </select>
+</div>
+
+<!-- Student Table -->
+<h3>Students in
+    {{ courses[selected_course_id - 1].name if selected_course_id else "Selected Course" }}
+    {{ sections[selected_section_id - 1].name if selected_section_id else "" }}
+</h3>
+<table class="table" id="student-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+
+    </tbody>
+</table>
+
+<script>
+    // Fetch sections dynamically based on the selected course
+    function updateSections() {
+        const courseId = document.getElementById('course').value;
+        const sectionSelect = document.getElementById('section');
+        sectionSelect.innerHTML = '<option value="">Loading...</option>'; // Show loading message
+
+        if (courseId) {
+            fetch(`/admin/get_sections/${courseId}`)
+                .then(response => {
+                    if (!response.ok) throw new Error("Network response was not ok");
+                    return response.json();
+                })
+                .then(data => {
+                    sectionSelect.innerHTML = '<option value="">Select a Section</option>'; // Reset options
+                    data.forEach(section => {
+                        const option = document.createElement('option');
+                        option.value = section.id;
+                        option.textContent = section.name;
+                        sectionSelect.appendChild(option);
+                    });
+
+                    // If there's a selected section, fetch the students
+                    const selectedSectionId = document.getElementById('section').value;
+                    if (selectedSectionId) {
+                        fetchStudents(courseId, selectedSectionId);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching sections:", error);
+                    sectionSelect.innerHTML = '<option value="">Error loading sections</option>';
+                });
+        } else {
+            sectionSelect.innerHTML = '<option value="">Select a Section</option>';
+        }
+    }
+
+    // Fetch students dynamically based on the selected course and section
+    function fetchStudents() {
+        const courseId = document.getElementById('course').value;
+        const sectionId = document.getElementById('section').value;
+
+        if (!courseId || !sectionId) return; // Ensure both course and section are selected
+
+        fetch(`/admin/get_students/${courseId}/${sectionId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch students');
+                }
+                return response.json();  // Parse JSON data
+            })
+            .then(data => {
+                updateStudentTable(data);
+            })
+            .catch(error => {
+                console.error('Error fetching students:', error);
+                alert('Error fetching students');
+            });
+    }
+
+    // Update the student table with the fetched students
+    function updateStudentTable(students) {
+        const tableBody = document.querySelector('#student-table tbody');
+        tableBody.innerHTML = '';  // Clear the existing table rows
+
+        if (students.length === 0) {
+            const row = document.createElement('tr');
+            const cell = document.createElement('td');
+            cell.colSpan = 2;  // Adjusted for two columns
+            cell.textContent = 'No students found for the selected course and section.';
+            row.appendChild(cell);
+            tableBody.appendChild(row);
+        } else {
+            students.forEach(student => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${student.first_name} ${student.last_name}</td>
+                    <td>
+                        <a href="/admin/view_student/${student.id}" class="btn btn-info">View</a>
+                        <a href="/admin/edit_student/${student.id}" class="btn btn-warning">Edit</a>
+                        <a href="/admin/delete_student/${student.id}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this student?');">Delete</a>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+    }
+</script>
+
+{% endblock %}

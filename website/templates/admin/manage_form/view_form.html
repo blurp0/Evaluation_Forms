@@ -1,0 +1,45 @@
+{% extends 'admin/base.html' %}
+
+{% block subtitle %}View Evaluation Form{% endblock %}
+
+{% block content %}
+    <h2>View Evaluation Form</h2>
+
+    <!-- Display the form details -->
+    <div class="form-details">
+        <p><strong>Title:</strong> {{ form.title }}</p>
+        <p><strong>Description:</strong> {{ form.description }}</p>
+        <p><strong>Created On:</strong> {{ form.created_on.strftime('%Y-%m-%d') }}</p>
+    </div>
+
+    <h3>Questions by Category</h3>
+    {% if questions_by_category %}
+        {% for category, questions in questions_by_category.items() %}
+            <h4>{{ category.name }}</h4>
+            {% if questions %}
+                <ol> <!-- Changed from <ul> to <ol> -->
+                    {% for question in questions %}
+                        <li>{{ question.question_text }}</li>
+                    {% endfor %}
+                </ol>
+            {% else %}
+                <p>No questions available for this category.</p>
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        <p>No questions available for this form.</p>
+    {% endif %}
+
+    <!-- Action buttons -->
+    <div class="form-actions">
+        <a href="{{ url_for('admin.edit_form', form_id=form.id) }}">
+            <button>Edit Form</button>
+        </a>
+        <form action="{{ url_for('admin.delete_form', form_id=form.id) }}" method="POST" style="display:inline;">
+            <button type="submit">Delete Form</button>
+        </form>
+        <a href="{{ url_for('admin.manage_forms') }}">
+            <button>Back to Manage Forms</button>
+        </a>
+    </div>
+{% endblock %}

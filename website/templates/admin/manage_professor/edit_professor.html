@@ -1,0 +1,24 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<h2>Edit Professor: {{ professor.first_name }} {{ professor.last_name }}</h2>
+
+<form method="POST">
+    <div class="mb-3">
+        <label for="first_name" class="form-label">First Name</label>
+        <input type="text" class="form-control" id="first_name" name="first_name" value="{{ professor.first_name }}" required>
+    </div>
+    <div class="mb-3">
+        <label for="last_name" class="form-label">Last Name</label>
+        <input type="text" class="form-control" id="last_name" name="last_name" value="{{ professor.last_name }}" required>
+    </div>
+    <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" class="form-control" id="email" name="email" value="{{ professor.email }}" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Update Professor</button>
+</form>
+
+<button onclick="location.href='{{ url_for('admin.load_professors') }}'">Back</button>
+
+{% endblock %}

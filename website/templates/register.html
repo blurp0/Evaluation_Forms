@@ -1,0 +1,203 @@
+{% extends 'index.html' %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="custom-login-bg">
+    <div class="auth-container">
+        <form method="POST" action="{{ url_for('auth.register') }}">
+            <h2>Register</h2>
+
+            <!-- Role Dropdown -->
+            <div class="input-group mb-3">
+                <select class="form-select custom-select" name="role" id="role" required>
+                    <option value="" disabled selected>Select your role</option>
+                    <option value="student">Student</option>
+                    <option value="professor">Professor</option>
+                </select>
+            </div>
+
+            <!-- First Name -->
+            <div class="input-group mb-3">
+                <input type="text" name="first_name" class="form-control" placeholder="First Name" required disabled>
+            </div>
+
+            <!-- Last Name -->
+            <div class="input-group mb-3">
+                <input type="text" name="last_name" class="form-control" placeholder="Last Name" required disabled>
+            </div>
+
+            <!-- Student ID (Initially hidden, shown for Student role) -->
+            <div class="input-group mb-3" id="student-id-group" style="display: none;">
+                <input type="text" name="student_id" id="student_id" class="form-control" placeholder="Select your role first" disabled>
+            </div>
+
+            <!-- Email (Visible for both roles) -->
+            <div class="input-group mb-3" id="email-group">
+                <input type="email" name="email" id="email" class="form-control" placeholder="Select your role first" required disabled>
+            </div>
+
+            <!-- Course Dropdown (Initially hidden, shown for Student role) -->
+            <div class="input-group mb-3" id="course-group" style="display: none;">
+                <select class="form-select custom-select" name="course_id" id="course_id" disabled>
+                    <option value="" disabled selected>Select Course</option>
+                    {% for course in courses %}
+                        <option value="{{ course.id }}">{{ course.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Section Dropdown (Initially hidden, shown for Student role) -->
+            <div class="input-group mb-3" id="section-group" style="display: none;">
+                <select class="form-select custom-select" name="section_id" id="section_id" disabled>
+                    <option value="" disabled selected>Select Section</option>
+                </select>
+            </div>
+
+            <!-- Password -->
+            <div class="input-group mb-3">
+                <input type="password" name="password" id="password" class="form-control custom-input" placeholder="Select your role first" required disabled>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary w-100" disabled>Register</button>
+        </form>
+    </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+  <ul class="flash-messages">
+    {% for category, message in messages %}
+      <li class="{{ category }} flash-message">
+        {{ message }}
+        <button class="close-flash" onclick="this.parentElement.style.display='none';">×</button>
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}
+{% endwith %}
+
+<script>
+    // JavaScript to update the placeholder based on selected role
+    document.getElementById('role').addEventListener('change', function() {
+        var studentFields = document.getElementById('student-id-group');
+        var courseFields = document.getElementById('course-group');
+        var sectionFields = document.getElementById('section-group');
+        var courseSelect = document.getElementById('course_id');
+        var sectionSelect = document.getElementById('section_id');
+        var firstNameInput = document.querySelector('input[name="first_name"]');
+        var lastNameInput = document.querySelector('input[name="last_name"]');
+        var passwordInput = document.querySelector('input[name="password"]');
+        var emailInput = document.querySelector('input[name="email"]');
+        var studentIdInput = document.querySelector('input[name="student_id"]');
+        var submitButton = document.querySelector('button[type="submit"]');
+
+        // Initially disable all inputs
+        firstNameInput.disabled = true;
+        lastNameInput.disabled = true;
+        passwordInput.disabled = true;
+        submitButton.disabled = true;
+        emailInput.disabled = true;
+        studentIdInput.disabled = true;
+
+        // Show and hide fields based on role selection
+        if (this.value === 'student') {
+            studentFields.style.display = 'block';
+            courseFields.style.display = 'block';
+            sectionFields.style.display = 'block';
+
+            // Enable student-related fields
+            firstNameInput.disabled = false;
+            lastNameInput.disabled = false;
+            studentIdInput.disabled = false;
+            passwordInput.disabled = false;
+            submitButton.disabled = false;
+
+            // Set placeholders and required fields for student role
+            studentIdInput.placeholder = 'Student ID';
+            passwordInput.placeholder = 'Password';
+            emailInput.placeholder = 'Email';
+
+            // Enable course and section dropdowns
+            courseSelect.disabled = false;
+            sectionSelect.disabled = false;
+            courseSelect.setAttribute('required', true);
+            sectionSelect.setAttribute('required', true);
+
+        } else if (this.value === 'professor') {
+            studentFields.style.display = 'none';
+            courseFields.style.display = 'none';
+            sectionFields.style.display = 'none';
+
+            // Enable professor-related fields
+            firstNameInput.disabled = false;
+            lastNameInput.disabled = false;
+            passwordInput.disabled = false;
+            submitButton.disabled = false;
+
+            // Set placeholders and required fields for professor role
+            studentIdInput.placeholder = 'Email';
+            passwordInput.placeholder = 'Password';
+            emailInput.placeholder = 'Email';
+
+            // Disable course and section dropdowns
+            courseSelect.disabled = true;
+            sectionSelect.disabled = true;
+            courseSelect.removeAttribute('required');
+            sectionSelect.removeAttribute('required');
+        } else {
+            studentFields.style.display = 'none';
+            courseFields.style.display = 'none';
+            sectionFields.style.display = 'none';
+
+            // Remove required attributes when no role is selected
+            courseSelect.removeAttribute('required');
+            sectionSelect.removeAttribute('required');
+
+            // Keep all fields disabled
+            firstNameInput.disabled = true;
+            lastNameInput.disabled = true;
+            passwordInput.disabled = true;
+            submitButton.disabled = true;
+            emailInput.disabled = true;
+            studentIdInput.disabled = true;
+
+            // Keep placeholder 'Select your role first' for all inputs
+            studentIdInput.placeholder = 'Select your role first';
+            emailInput.placeholder = 'Select your role first';
+            passwordInput.placeholder = 'Select your role first';
+        }
+
+        // Disable email input if no role is selected
+        if (!this.value) {
+            emailInput.disabled = true;
+        } else {
+            emailInput.disabled = false;
+        }
+    });
+
+    // JavaScript to dynamically load sections based on selected course
+    document.getElementById('course_id').addEventListener('change', function() {
+        var course_id = this.value;
+        if (course_id) {
+            fetch('/get_sections/' + course_id)
+                .then(response => response.json())
+                .then(data => {
+                    var sectionSelect = document.getElementById('section_id');
+                    sectionSelect.innerHTML = '<option value="" disabled selected>Select Section</option>';
+                    data.sections.forEach(function(section) {
+                        var option = document.createElement('option');
+                        option.value = section.id;
+                        option.textContent = section.name;
+                        sectionSelect.appendChild(option);
+                    });
+                });
+        }
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+
+{% endblock %}

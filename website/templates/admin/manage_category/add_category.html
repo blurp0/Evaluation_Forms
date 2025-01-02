@@ -1,0 +1,32 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<h1>Add New Categories</h1>
+<form method="POST">
+    <div id="category-fields">
+        <div class="form-group">
+            <label for="category_name_0">Category Name:</label>
+            <input type="text" name="category_name[]" id="category_name_0" class="form-control" required>
+        </div>
+    </div>
+    <button type="button" class="btn btn-secondary" id="add-category-field">Add Another Category</button>
+    <br><br>
+    <button type="submit" class="btn btn-primary">Add Categories</button>
+    <a href="{{ url_for('admin.manage_categories') }}" class="btn btn-secondary">Cancel</a>
+</form>
+
+<script>
+    let fieldIndex = 1;
+    document.getElementById('add-category-field').addEventListener('click', function() {
+        const newField = document.createElement('div');
+        newField.classList.add('form-group');
+        newField.innerHTML = `
+            <label for="category_name_${fieldIndex}">Category Name:</label>
+            <input type="text" name="category_name[]" id="category_name_${fieldIndex}" class="form-control" required>
+        `;
+        document.getElementById('category-fields').appendChild(newField);
+        fieldIndex++;
+    });
+</script>
+
+{% endblock %}

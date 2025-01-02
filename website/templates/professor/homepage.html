@@ -1,0 +1,112 @@
+{% extends 'professor/base.html' %}
+
+{% block title %}Professor Overview{% endblock %}
+
+{% block content %}
+<style>
+    /* Custom CSS to make cards the same height */
+    .equal-height-cards .card {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .equal-height-cards .card-body {
+        flex-grow: 1;
+    }
+</style>
+
+<div class="container">
+    <h1 class="mb-4">Professor Overview</h1>
+    <div class="row g-4">
+        <!-- COLUMN 1 and COLUMN 2: Student Count, Section Count, Subject Count -->
+        <div class="col-md-12">
+            <div class="row g-4">
+                <!-- Card: Total Students -->
+                <div class="col-md-4">
+                    <div class="card shadow-sm text-center mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">Total Students</h5>
+                            <p class="display-4 text-primary">{{ data.num_students }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card: Total Sections -->
+                <div class="col-md-4">
+                    <div class="card shadow-sm text-center mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title text-success">Total Sections</h5>
+                            <p class="display-4 text-success">{{ data.num_sections }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card: Total Subjects -->
+                <div class="col-md-4">
+                    <div class="card shadow-sm text-center mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title text-warning">Total Subjects</h5>
+                            <p class="display-4 text-warning">{{ data.num_subjects }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cards for Performance Metrics in a Row -->
+            <div class="row g-4 equal-height-cards">
+                <!-- Card: Overall Performance -->
+                <div class="col-md-4">
+                    <div class="card shadow-sm text-center mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title text-info">Overall Performance</h5>
+                            {% if data.overall_performance is not none %}
+                                <p class="display-4 text-info" style="font-size: 2.5rem; font-weight: bold; display: center; padding-top: 20px; ">
+                                    {{ data.overall_performance }}
+                                </p>
+                            <a href="{{ url_for('professor.view_performance') }}" class="btn mt-3" style="background-color: var(--first-color); color: white;">View More</a>
+                            {% else %}
+                                <p>No overall performance data available.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card: Best Category -->
+                <div class="col-md-4">
+                    <div class="card shadow-sm text-center mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title text-success">Best Category</h5>
+                            {% if data.highest_performance %}
+                                <p class="card-title">{{ data.highest_performance.category.name }}</p>
+                                <p class="display-4 text-success">
+                                    {{ data.highest_performance.average_grade }}
+                                </p>
+                            {% else %}
+                                <p>No performance data available.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card: Weakest Category -->
+                <div class="col-md-4">
+                    <div class="card shadow-sm text-center mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title text-danger">Weakest Category</h5>
+                            {% if data.lowest_performance %}
+                                <p class="card-title">{{ data.lowest_performance.category.name }}</p>
+                                <p class="display-4 text-danger">
+                                    {{ data.lowest_performance.average_grade }}
+                                </p>
+                            {% else %}
+                                <p>No performance data available.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

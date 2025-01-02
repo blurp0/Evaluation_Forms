@@ -1,0 +1,345 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<h2>Performance Details for {{ professor.first_name }} {{ professor.last_name }}</h2>
+
+<div class="row g-4" id="contentToDownload">
+    <!-- Overall Performance Card -->
+    <div class="col-md-4 d-flex">
+        <div class="card shadow-sm text-center mb-3 w-100" style="border-radius: 10px;">
+            <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                <h5 class="card-title text-primary">Overall Performance</h5>
+                <p class="display-4 text-primary">{{ overall_performance.overall_average | round(2) }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Best Category Card -->
+    <div class="col-md-4 d-flex">
+        <div class="card shadow-sm text-center mb-3 w-100" style="border-radius: 10px;">
+            <div class="card-body d-flex flex-column justify-content-between">
+                <h5 class="card-title text-success">Best Category</h5>
+                <p class="display-4 text-success">{{ overall_performance.best_category.score | round(2) }}</p>
+                <p class="display-12">{{ overall_performance.best_category.name }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Worst Category Card -->
+    <div class="col-md-4 d-flex">
+        <div class="card shadow-sm text-center mb-3 w-100" style="border-radius: 10px;">
+            <div class="card-body d-flex flex-column justify-content-between">
+                <h5 class="card-title text-danger">Worst Category</h5>
+                <p class="display-4 text-danger">{{ overall_performance.worst_category.score | round(2) }}</p>
+                <p class="display-12">{{ overall_performance.worst_category.name }}</p>
+            </div>
+        </div>
+    </div>
+
+<br><br>
+<!-- Category-wise Performance Table and Graph Next to Each Other -->
+<div class="row" style="display: flex; align-items: stretch;">
+    <!-- Left Column: Category-wise Performance Table -->
+    <div class="col-md-6" style="display: flex; flex-direction: column;">
+        <h5 style="margin-top: 25px;">Category-wise Performance:</h5>
+        <table class="table table-bordered" style="flex-grow: 1;">
+            <thead>
+                <tr>
+                    <th style="background-color: var(--first-color);">Category</th>
+                    <th style="background-color: var(--first-color);">Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category_id, performance in overall_performance.categories.items() %}
+                    <tr>
+                        <td><strong>{{ category_id_to_name[category_id] }}</strong></td>
+                        <td>{{ (performance.total / performance.count) | round(2) }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+<!-- Right Column: Category-wise Performance Graph -->
+<div class="col-md-6" style="display: flex; flex-direction: column;">
+    <h5 style="margin-top: 25px;">Performance Graph:</h5>
+    <div class="mt-4" style="max-width: 100%; height: 450px; margin: auto; border: 2px solid #333; background-color: white; flex-grow: 1;">
+        <div id="legendContainer" style="margin: 10px 0; text-align: center; display: flex; flex-wrap: wrap; justify-content: center;"></div>
+        <div style="position: relative; width: 100%; height: 100%;">
+            <canvas id="verticalBarChart" style="width: 100%; height: 100%; margin-bottom: 120px;"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Subject-wise Performance Table and Graph in Last Column -->
+<div class="row" style="display: flex; align-items: stretch;">
+    <!-- Left Column: Subject-wise Performance Graph -->
+    <div class="col-md-6" style="display: flex; flex-direction: column;">
+        <h5 style="margin-top: 50px;">Subject-wise Performance Graph:</h5>
+        <div class="mt-4" style="width: 100%; height: 450px; margin: auto; border: 2px solid #333; background-color: white;">
+            <canvas id="subjectBarChart" style="height: 100%;"></canvas>
+        </div>
+    </div>
+
+    <!-- Right Column: Subject-wise Performance Table -->
+    <div class="col-md-6" style="display: flex; flex-direction: column;">
+        <h5 style="margin-top: 50px;">Subject-wise Performance:</h5>
+        <table class="table table-bordered" style="flex-grow: 1;">
+            <thead>
+                <tr>
+                    <th style="background-color: var(--first-color);">Subject</th>
+                    <th style="background-color: var(--first-color);">Total Average</th>  <!-- New column for the total average -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for subject_id, subject_data in professor_performance.items() %}
+                    <tr>
+                        <td>{{ subject_data.subject_name }}</td>
+                        <td>{{ subject_data.total_average | round(2) }}</td>  <!-- Display the total average -->
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+</div>
+</div>
+
+<br><br>
+<!-- Back Button -->
+<div class="row">
+    <div class="col-md-12">
+        <a href="{{ url_for('admin.load_professors') }}" class="btn btn-secondary" style="margin-bottom: 20px;">
+            <i class="fa fa-arrow-left"></i> Back to Professor List
+        </a>
+        <button class="btn btn-primary" id="downloadPdf" style="margin-bottom: 20px;">
+            <i class="fa fa-download"></i> Download as PDF
+        </button>
+    </div>
+</div>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- Include dompurify -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.4.0/purify.min.js"></script>
+<!-- Include html2canvas -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+    // Data for the Subject-wise Bar Chart
+    var subjectData = [
+        {% for subject_id, subject_data in professor_performance.items() %}
+            {{ subject_data.total_average | round(2) }}{% if not loop.last %}, {% endif %}
+        {% endfor %}
+    ];
+
+    var subjectLabels = [
+        {% for subject_id, subject_data in professor_performance.items() %}
+            "{{ subject_data.subject_name }}"{% if not loop.last %}, {% endif %}
+        {% endfor %}
+    ];
+
+    var subjectBarCtx = document.getElementById('subjectBarChart').getContext('2d');
+    var subjectBarChart = new Chart(subjectBarCtx, {
+        type: 'bar',
+        data: {
+            labels: subjectLabels,  // Subjects on X-axis
+            datasets: [{
+                label: 'Total Average',
+                data: subjectData,  // Scores for each subject
+                backgroundColor: 'rgba(33, 150, 243, 0.6)',  // Blue bars
+                borderColor: 'rgba(33, 150, 243, 1)',  // Blue border for bars
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        display: true
+                    }
+                },
+                y: {
+                    min: 1,  // Set the minimum value for y-axis to 1
+                    max: 5,  // Set the maximum value for y-axis to 5
+                    ticks: {
+                        stepSize: 1,  // Ensure that the y-axis ticks are in whole numbers
+                        display: true   // Ensure the y-axis ticks are visible
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem) {
+                            return `Score: ${tooltipItem.raw}`;  // Tooltip shows the score for each subject
+                        }
+                    }
+                }
+            }
+        }
+    });
+// Data for the Category-wise Bar Chart
+var categoriesData = {{ categories_data | tojson }};  // Serialized categories data
+var verticalBarCtx = document.getElementById('verticalBarChart').getContext('2d');
+var performanceData = [
+    {% for category_id, performance in overall_performance.categories.items() %}
+        {{ (performance.total / performance.count) | round(2) }}{% if not loop.last %}, {% endif %}
+    {% endfor %}
+];
+
+var barColors = [
+    'rgba(76, 175, 80, 0.6)',  // Green
+    'rgba(33, 150, 243, 0.6)', // Blue
+    'rgba(255, 193, 7, 0.6)',  // Yellow
+    'rgba(244, 67, 54, 0.6)',  // Red
+    'rgba(103, 58, 183, 0.6)'  // Purple
+];
+
+// Initialize Vertical Bar Chart
+var verticalBarChart = new Chart(verticalBarCtx, {
+    type: 'bar',
+    data: {
+        labels: categoriesData.map(category => category.name),
+        datasets: [{
+            data: performanceData,
+            backgroundColor: barColors.slice(0, performanceData.length),
+            borderColor: barColors.map(color => color.replace('0.6', '1')),
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: 'x',  // Vertical bars
+        scales: {
+            x: {
+                beginAtZero: true,
+                ticks: { display: false }  // Hide x-axis labels
+            },
+            y: {
+                min: 1,
+                max: 5,
+                ticks: {
+                    stepSize: 1,
+                    display: true
+                }
+            }
+        },
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    title: function(tooltipItems) {
+                        return categoriesData[tooltipItems[0].dataIndex].name;  // Tooltip category name
+                    },
+                    label: function(tooltipItem) {
+                        return `Score: ${tooltipItem.raw}`;
+                    }
+                }
+            },
+            legend: { display: false }  // Hide default legend
+        }
+    }
+});
+
+// Custom Legend Creation
+var legendContainer = document.getElementById('legendContainer');
+categoriesData.forEach((category, index) => {
+    if (index >= performanceData.length) return;
+
+    var legendItem = document.createElement('div');
+    legendItem.style.display = 'flex';
+    legendItem.style.alignItems = 'center';
+    legendItem.style.marginRight = '15px';
+
+    var colorBox = document.createElement('span');
+    colorBox.style.backgroundColor = barColors[index];
+    colorBox.style.width = '12px';
+    colorBox.style.height = '12px';
+    colorBox.style.marginRight = '10px';
+
+    var label = document.createTextNode(category.name);
+    legendItem.appendChild(colorBox);
+    legendItem.appendChild(label);
+    legendContainer.appendChild(legendItem);
+});
+
+document.getElementById("downloadPdf").addEventListener("click", function () {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    const downloadButton = document.getElementById("downloadPdf");
+    const content = document.querySelector("#contentToDownload");
+
+    // Hide the download button
+    downloadButton.style.display = "none";
+
+    // Convert all canvas elements to images
+    const canvasElements = document.querySelectorAll("canvas");
+    const canvasImages = [];
+
+    // Replace canvas with images (temporarily)
+    canvasElements.forEach((canvas, index) => {
+        const imgData = canvas.toDataURL("image/png");
+        const img = document.createElement("img");
+        img.src = imgData;
+        img.style.width = canvas.style.width || "100%";
+        img.style.height = canvas.style.height || "100%";
+        canvasImages.push({ canvas, img });
+        canvas.replaceWith(img); // Replace canvas with the image
+    });
+
+    // Wait briefly to ensure all images are in place
+    setTimeout(() => {
+        html2canvas(content, {
+            scale: 2, // Higher resolution
+            useCORS: true, // Handle cross-origin images
+            scrollY: -window.scrollY, // Fix scrolling issue
+        }).then((canvas) => {
+            const imgData = canvas.toDataURL("image/jpeg", 1.0);
+            const imgWidth = 190;
+            const pageHeight = 295;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            let heightLeft = imgHeight;
+            let position = 10;
+
+            // Add image to PDF
+            while (heightLeft > 0) {
+                doc.addImage(imgData, "JPEG", 10, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+                position -= pageHeight;
+                if (heightLeft > 0) doc.addPage();
+            }
+
+            // Restore the original canvas elements
+            canvasImages.forEach(({ canvas, img }) => {
+                img.replaceWith(canvas);
+            });
+
+            // Save the PDF
+            doc.save("performance-details.pdf");
+
+            // Show download button again
+            downloadButton.style.display = "block";
+        }).catch((err) => {
+            console.error("Error generating PDF:", err);
+
+            // Restore the original canvas elements
+            canvasImages.forEach(({ canvas, img }) => {
+                img.replaceWith(canvas);
+            });
+
+            downloadButton.style.display = "block";
+        });
+    }, 1000); // Delay to ensure the DOM updates
+});
+
+
+</script>
+
+{% endblock %}

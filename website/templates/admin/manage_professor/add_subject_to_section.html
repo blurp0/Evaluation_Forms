@@ -1,0 +1,22 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+    <h2>Add Subject to Section: {{ section.name }}</h2>
+
+    <!-- Form for adding subject to section -->
+    <form method="POST">
+        <div class="mb-3">
+            <label for="subject_id" class="form-label">Select Subject</label>
+            <select class="form-select" id="subject_id" name="subject_id" required>
+                <option value="" disabled selected>Select a subject</option>
+                {% for subject in subjects %}
+                    <option value="{{ subject.id }}">{{ subject.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary">Add Subject to Section</button>
+    </form>
+
+{% endblock %}

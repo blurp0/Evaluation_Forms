@@ -1,0 +1,92 @@
+{% extends 'admin/base.html' %}
+
+{% block subtitle %}Create Evaluation Form{% endblock %}
+
+{% block content %}
+    <h2>Create Evaluation Form</h2>
+
+    <form action="{{ url_for('admin.create_form') }}" method="POST">
+        <label for="form_title">Form Title:</label><br>
+        <input type="text" id="form_title" name="form_title" required><br><br>
+
+        <label for="form_description">Form Description:</label><br>
+        <textarea id="form_description" name="form_description" rows="4" required></textarea><br><br>
+
+        <h3>Categories</h3>
+        <div id="categories-container">
+            {% for category in categories %}
+            {% if category.name != "Comments / Suggestions" %}
+            <div class="category-container">
+                <h4>{{ category.name }}</h4>
+                <input type="hidden" name="category_ids[]" value="{{ category.id }}">
+
+                <div class="questions-container" id="questions-{{ category.id }}">
+                    <div class="question">
+                        <label for="question_{{ category.id }}_1">Question 1:</label><br>
+                        <input type="text" name="category_questions_{{ category.id }}[]" class="form-control" required>
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-primary add-question" data-category-id="{{ category.id }}">Add More Questions</button>
+            </div>
+            <br>
+            {% endif %}
+            {% endfor %}
+        </div>
+        <button type="submit" class="btn btn-success">Create Form</button>
+    </form>
+
+    <script>
+        // JavaScript to add more question input fields dynamically for each category
+        document.querySelectorAll('.add-question').forEach(button => {
+            button.addEventListener('click', function() {
+                let categoryId = this.getAttribute('data-category-id');
+                let questionCount = document.querySelectorAll(`#questions-${categoryId} .question`).length + 1;
+
+                // Create a new question input field for the selected category
+                const newQuestionDiv = document.createElement('div');
+                newQuestionDiv.classList.add('question');
+
+                const label = document.createElement('label');
+                label.setAttribute('for', `question_${categoryId}_${questionCount}`);
+                label.textContent = `Question ${questionCount}:`;
+
+                const input = document.createElement('input');
+                input.setAttribute('type', 'text');
+                input.setAttribute('name', `category_questions_${categoryId}[]`);
+                input.classList.add('form-control');
+                input.required = true;
+
+                // Create the "X" remove button
+                const removeButton = document.createElement('button');
+                removeButton.setAttribute('type', 'button');
+                removeButton.classList.add('btn', 'btn-danger', 'btn-sm', 'mt-2', 'remove-question');
+                removeButton.textContent = 'X';
+
+                // Append the label, input, and remove button to the new question div
+                newQuestionDiv.appendChild(label);
+                newQuestionDiv.appendChild(document.createElement('br'));
+                newQuestionDiv.appendChild(input);
+                newQuestionDiv.appendChild(removeButton);
+                newQuestionDiv.appendChild(document.createElement('br'));
+
+                // Append the new question div to the category's questions container
+                document.getElementById(`questions-${categoryId}`).appendChild(newQuestionDiv);
+
+                // Add event listener to remove button to delete the input field
+                removeButton.addEventListener('click', function() {
+                    newQuestionDiv.remove();
+                });
+            });
+        });
+
+        // Initial event listener for existing "X" buttons in case there are pre-filled questions
+        document.querySelectorAll('.remove-question').forEach(button => {
+            button.addEventListener('click', function() {
+                let questionDiv = this.closest('.question');
+                questionDiv.remove();
+            });
+        });
+    </script>
+
+{% endblock %}

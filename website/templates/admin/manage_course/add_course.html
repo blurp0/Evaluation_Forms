@@ -1,0 +1,90 @@
+{% extends "admin/base.html" %}
+
+{% block subtitle %}Add New Course{% endblock %}
+
+{% block content %}
+<h2>Add New Course</h2>
+
+<form method="POST" action="{{ url_for('admin.add_course') }}">
+    <label for="name">Course Name:</label>
+    <input type="text" name="name" required><br><br>
+
+    <h3>Sections</h3>
+    <br>
+    <div id="section_fields">
+        <div class="section_input">
+            <label for="section_names[]">Section Name:</label>
+            <input type="text" name="section_names[]" required>
+            <span class="remove_x" onclick="removeSectionInput(this)">&#10005;</span><br><br>
+        </div>
+    </div>
+    <button type="button" id="add_section_button">Add Another Section</button><br><br>
+    <br>
+<hr>
+    <br>
+    <h3>Subjects</h3>
+    <br>
+    <div id="subject_fields">
+        <div class="subject_input">
+            <label for="subject_names[]">Subject Name:</label>
+            <input type="text" name="subject_names[]" required>
+            <span class="remove_x" onclick="removeSubjectInput(this)">&#10005;</span><br><br>
+        </div>
+    </div>
+    <button type="button" id="add_subject_button">Add Another Subject</button><br><br>
+
+    <br>
+<hr>
+    <br>
+
+    <button type="submit">Add Course</button>
+</form>
+
+<br><br>
+
+<button onclick="location.href='{{ url_for('admin.manage_courses') }}'">Cancel</button>
+
+
+<script>
+    // Function to add new section input field
+    document.getElementById('add_section_button').onclick = function() {
+        var newSection = document.createElement('div');
+        newSection.classList.add('section_input');
+        newSection.innerHTML = '<label for="section_names[]">Section Name:</label><input type="text" name="section_names[]" required>' +
+                               '<span class="remove_x" onclick="removeSectionInput(this)">&#10005;</span><br><br>';
+        document.getElementById('section_fields').appendChild(newSection);
+    }
+
+    // Function to add new subject input field
+    document.getElementById('add_subject_button').onclick = function() {
+        var newSubject = document.createElement('div');
+        newSubject.classList.add('subject_input');
+        newSubject.innerHTML = '<label for="subject_names[]">Subject Name:</label><input type="text" name="subject_names[]" required>' +
+                               '<span class="remove_x" onclick="removeSubjectInput(this)">&#10005;</span><br><br>';
+        document.getElementById('subject_fields').appendChild(newSubject);
+    }
+
+    // Function to remove section input field
+    function removeSectionInput(button) {
+        button.parentElement.remove();
+    }
+
+    // Function to remove subject input field
+    function removeSubjectInput(button) {
+        button.parentElement.remove();
+    }
+</script>
+
+<style>
+.remove_x {
+    color: darkgey;
+    font-size: 20px;
+    cursor: pointer;
+    padding-left: 10px;
+}
+.remove_x:hover {
+    color: red;
+}
+</style>
+
+{% endblock %}

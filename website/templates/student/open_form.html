@@ -1,0 +1,84 @@
+{% extends "student/base.html" %}
+
+{% block subtitle %}Answer Evaluation Forms{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">{{ form.title }}</h1>
+    <p class="text-muted mb-4">{{ form.description }}</p>
+
+    <!-- Display professor and subject -->
+    <p><strong>Professor:</strong> {{ professor_name }}</p>
+    <p><strong>Subject:</strong> {{ subject_name }}</p>
+
+    <form method="POST" action="{{ url_for('student.submit_answer') }}">
+        <!-- Hidden field to pass form_distribution_id -->
+        <input type="hidden" name="form_distribution_id" value="{{ form_distribution.id }}">
+
+        <!-- Start Bootstrap Accordion (with independent sections) -->
+        <div class="accordion" id="evaluationAccordion">
+            {% for category_id, category_data in categories.items() %}
+                <div class="card mb-3">
+                    <div class="card-header" id="heading{{ loop.index }}">
+                        <h5 class="mb-0">
+                            <!-- Accordion Toggle Button -->
+                            <button class="btn btn-link" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapse{{ loop.index }}" aria-expanded="false"
+                                aria-controls="collapse{{ loop.index }}">
+                                {{ category_data.name }}
+                            </button>
+                        </h5>
+                    </div>
+
+                    <!-- Accordion Body -->
+                    <div id="collapse{{ loop.index }}" class="collapse" aria-labelledby="heading{{ loop.index }}">
+                        <div class="card-body">
+                            {% if category_data.name == 'Comments / Suggestions' %}
+                                <!-- Comments / Suggestions Textarea -->
+                                <div class="mb-3">
+                                    <textarea
+                                        class="form-control"
+                                        name="category_{{ category_data.name }}"
+                                        placeholder="Enter your comments/suggestions here"
+                                        rows="3">
+                                    </textarea>
+                                </div>
+                            {% else %}
+                                <!-- Ratings for other categories -->
+                                <ol class="list-group list-group-numbered">
+                                    {% for question in category_data.questions %}
+                                        <li class="list-group-item">
+                                            <p class="mb-2">{{ question.question_text }}</p>
+                                            <div class="d-flex justify-content-start gap-2">
+                                                {% for i in range(1, 6) %}
+                                                    <div class="form-check">
+                                                        <input
+                                                            class="form-check-inline"
+                                                            type="radio"
+                                                            name="question_{{ question.id }}"
+                                                            id="question_{{ question.id }}_{{ i }}"
+                                                            value="{{ i }}"
+                                                            required>
+                                                        <label class="form-check-label" for="question_{{ question.id }}_{{ i }}">
+                                                            {{ i }}
+                                                        </label>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        </li>
+                                    {% endfor %}
+                                </ol>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <!-- End Bootstrap Accordion -->
+
+        <div class="d-grid mt-4">
+            <button type="submit" class="btn btn-primary btn-lg">Submit</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

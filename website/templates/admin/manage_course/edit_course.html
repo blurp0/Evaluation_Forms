@@ -1,0 +1,162 @@
+{% extends "admin/base.html" %}
+{% block subtitle %}Edit Course: {{ course.name }}{% endblock %}
+
+{% block content %}
+<h2>Edit Course: {{ course.name }}</h2>
+
+<!-- Form for editing the course (course name, sections, and subjects) -->
+<form method="POST" action="{{ url_for('admin.edit_course', course_id=course.id) }}">
+    <br>
+    <h3>Update Course Name</h3>
+    <label for="name">Course Name:</label>
+    <input type="text" name="name" value="{{ course.name }}" required style="width: 300px;"><br><br>
+<hr>
+    <br>
+    <h3>Manage Sections</h3>
+    <br>
+    <!-- List of Existing Sections -->
+<h4>Existing Sections</h4><br>
+<table>
+    <thead>
+        <tr>
+            <th>Section Name</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+{% for section in course.sections %}
+<tr>
+    <td>{{ section.name }}</td>
+    <td>
+        <form method="POST" style="display:inline;">
+            <!-- Edit Section Button -->
+            <button
+                type="submit"
+                formaction="{{ url_for('admin.edit_section', section_id=section.id) }}"
+                formmethod="GET">
+                Edit Section
+            </button>
+
+            <!-- Delete Section Button -->
+            <button
+                type="submit"
+                formaction="{{ url_for('admin.delete_section', section_id=section.id) }}"
+                formmethod="POST"
+                onclick="return confirm('Are you sure you want to delete this section?')">
+                Delete Section
+            </button>
+        </form>
+    </td>
+</tr>
+{% endfor %}
+
+    </tbody>
+</table>
+
+    <!-- Add New Section Form (with dynamic input) -->
+    <br>
+    <h4>Add New Section</h4>
+    <br>
+    <div id="section_inputs">
+    </div>
+    <button type="button" onclick="addSectionInput()">Add Another Section</button>
+    <br><br>
+    <hr>
+    <br>
+
+    <h3>Manage Subjects</h3>
+    <br>
+    <!-- List of Existing Subjects -->
+    <h4>Existing Subjects</h4>
+    <br>
+    <table>
+        <thead>
+            <tr>
+                <th>Subject Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for subject in course.subjects %}
+            <tr>
+                <td>{{ subject.name }}</td>
+                <td> <br> <br>
+                    <!-- Edit Subject Button -->
+                    <form action="{{ url_for('admin.edit_subject', subject_id=subject.id) }}" method="GET" style="display:inline;">
+                        <button type="submit">Edit Subject</button>
+                    </form>
+                    <!-- Delete Subject Button -->
+                    <form action="{{ url_for('admin.delete_subject', subject_id=subject.id) }}" method="POST" style="display:inline;">
+                        <button type="submit" onclick="return confirm('Are you sure you want to delete this subject?')">Delete Subject</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Add New Subject Form (with dynamic input) -->
+    <br>
+    <h4>Add New Subject</h4>
+    <br>
+    <div id="subject_inputs">
+    </div>
+    <button type="button" onclick="addSubjectInput()">Add Another Subject</button>
+    <br><br>
+    <hr>
+    <br>
+    <!-- Single Update Button -->
+    <button type="submit">Update All Changes</button>
+</form>
+
+<br><br>
+
+<button onclick="location.href='{{ url_for('admin.manage_courses') }}'">Cancel</button>
+
+<script>
+// JavaScript to add new input fields for sections and subjects dynamically
+function addSectionInput() {
+    var container = document.getElementById('section_inputs');
+    var newInput = document.createElement('div');
+    newInput.classList.add('section_input');
+    newInput.innerHTML = '<br><label for="section_names[]">New Section Name:</label>' +
+                         '<input type="text" name="section_names[]">' +
+                         '<span class="remove_x" onclick="removeSectionInput(this)">&#10005;</span><br><br>';
+    container.appendChild(newInput);
+}
+
+function addSubjectInput() {
+    var container = document.getElementById('subject_inputs');
+    var newInput = document.createElement('div');
+    newInput.classList.add('subject_input');
+    newInput.innerHTML = '<br><label for="subject_names[]">New Subject Name:</label>' +
+                         '<input type="text" name="subject_names[]">' +
+                         '<span class="remove_x" onclick="removeSubjectInput(this)">&#10005;</span><br><br>';
+    container.appendChild(newInput);
+}
+
+// JavaScript to remove input fields
+function removeSectionInput(button) {
+    button.parentElement.remove();
+}
+
+function removeSubjectInput(button) {
+    button.parentElement.remove();
+}
+</script>
+
+<style>
+.remove_x {
+    color: red;
+    font-size: 20px;
+    cursor: pointer;
+    padding-left: 10px;
+}
+.remove_x:hover {
+    color: darkred;
+}
+</style>
+
+{% endblock %}
+

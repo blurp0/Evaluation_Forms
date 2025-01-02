@@ -1,0 +1,98 @@
+{% extends 'admin/base.html' %}
+
+{% block subtitle %}Edit Evaluation Form{% endblock %}
+
+{% block content %}
+    <h2>Edit Evaluation Form</h2>
+
+    <form action="{{ url_for('admin.edit_form', form_id=form.id) }}" method="POST">
+        <label for="form_title">Form Title:</label><br>
+        <input type="text" id="form_title" name="form_title" value="{{ form.title }}" required><br><br>
+
+        <label for="form_description">Form Description:</label><br>
+        <textarea id="form_description" name="form_description" rows="4" required>{{ form.description }}</textarea><br><br>
+
+        <h3>Questions by Category</h3>
+        {% for category, questions in questions_by_category.items() %}
+            <div class="category-container">
+                <h4>{{ category.name }}</h4>
+                <div class="questions-container" id="questions-{{ category.id }}">
+                    {% for question in questions %}
+                        <div class="question">
+                            <label for="question_{{ question.id }}">Question:</label><br>
+                            <input type="text" id="question_{{ question.id }}" name="questions[{{ question.id }}]"
+                                   value="{{ question.question_text }}" required>
+                            <button type="button" class="btn btn-danger btn-sm remove-question"
+                                    data-question-id="{{ question.id }}">X</button>
+                            <input type="hidden" name="removed_questions[]" value="{{ question.id }}" disabled>
+                        </div>
+                    {% endfor %}
+                </div>
+                <button type="button" class="btn btn-primary add-question" data-category-id="{{ category.id }}">
+                    Add Question
+                </button>
+            </div>
+        {% endfor %}
+
+        <br>
+        <button type="submit" class="btn btn-success">Save Changes</button>
+        <a href="{{ url_for('admin.manage_forms') }}">
+            <button type="button" class="btn btn-secondary">Cancel</button>
+        </a>
+    </form>
+
+    <script>
+        // Handle dynamically adding new questions
+        document.querySelectorAll('.add-question').forEach(button => {
+            button.addEventListener('click', function () {
+                const categoryId = this.getAttribute('data-category-id');
+                const questionsContainer = document.getElementById(`questions-${categoryId}`);
+                const questionCount = questionsContainer.querySelectorAll('.question').length + 1;
+
+                // Create a new question input field
+                const newQuestionDiv = document.createElement('div');
+                newQuestionDiv.classList.add('question');
+
+                const label = document.createElement('label');
+                label.textContent = `New Question ${questionCount}:`;
+
+                const input = document.createElement('input');
+                input.setAttribute('type', 'text');
+                input.setAttribute('name', `new_questions_${categoryId}[]`);
+                input.classList.add('form-control');
+                input.required = true;
+
+                const removeButton = document.createElement('button');
+                removeButton.setAttribute('type', 'button');
+                removeButton.classList.add('btn', 'btn-danger', 'btn-sm', 'remove-question');
+                removeButton.textContent = 'X';
+
+                // Attach event listener to remove button for new questions
+                removeButton.addEventListener('click', function () {
+                    newQuestionDiv.remove();
+                });
+
+                newQuestionDiv.appendChild(label);
+                newQuestionDiv.appendChild(document.createElement('br'));
+                newQuestionDiv.appendChild(input);
+                newQuestionDiv.appendChild(removeButton);
+                questionsContainer.appendChild(newQuestionDiv);
+            });
+        });
+
+        // Handle removing existing questions
+        document.querySelectorAll('.remove-question').forEach(button => {
+            button.addEventListener('click', function () {
+                const questionDiv = this.closest('.question');
+                const hiddenInput = questionDiv.querySelector('input[type="hidden"]');
+
+                if (hiddenInput) {
+                    hiddenInput.disabled = !hiddenInput.disabled; // Toggle the hidden input's disabled state
+                    questionDiv.style.display = hiddenInput.disabled ? '' : 'none'; // Hide or show the question
+                } else {
+                    questionDiv.remove(); // For dynamically added questions
+                }
+            });
+        });
+    </script>
+{% endblock %}

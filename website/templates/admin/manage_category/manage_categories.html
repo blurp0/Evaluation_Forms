@@ -1,0 +1,34 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<h1>Manage Categories</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for category in categories %}
+        <tr>
+            <td>{{ category.id }}</td>
+            <td>{{ category.name }}</td>
+            <td>
+                <!-- Delete button for each category -->
+                <form action="{{ url_for('admin.delete_category', category_id=category.id) }}" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<br><br>
+<!-- Button to navigate to the Edit All Categories page -->
+<a href="{{ url_for('admin.edit_category') }}" class="btn btn-warning">Edit All Categories</a>
+<br><br>
+
+{% endblock %}

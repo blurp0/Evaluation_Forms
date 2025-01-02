@@ -1,0 +1,27 @@
+{% extends "student/base.html" %}
+
+{% block subtitle %}Pending Evaluation Forms{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Pending Evaluation Forms</h1>
+
+    {% if pending_forms %}
+        <div class="list-group">
+            {% for form_info in pending_forms %}
+                <a href="{{ url_for('student.open_form', form_distribution_id=form_info.form_distribution_id) }}" class="list-group-item list-group-item-action">
+                    <h5 class="mb-1">{{ form_info.form.title }}</h5>
+                    <p class="mb-1 text-muted">{{ form_info.form.description }}</p>
+                    <p><strong>Professor:</strong> {{ form_info.professor_name }}</p>
+                    <p><strong>Subject:</strong> {{ form_info.subject_name }}</p>
+                    <p><strong>Deadline:</strong> {{ form_info.deadline.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            No pending forms for your section.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

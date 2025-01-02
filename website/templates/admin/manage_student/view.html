@@ -1,0 +1,33 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<h2>View Student</h2>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">{{ student.first_name }} {{ student.last_name }}</h5>
+        <p class="card-text">
+            <strong>Student ID:</strong> {{ student.student_id }}<br>
+            <strong>Email:</strong> {{ student.email }}<br>
+            <strong>Age:</strong> {{ student.age if student.age else 'N/A' }}<br>
+            <strong>Section:</strong> 
+            {% if student.section %}
+                {{ student.section.name }}
+            {% else %}
+                N/A
+            {% endif %}
+        </p>
+
+        <!-- Display form status counts -->
+        <h5>Form Status:</h5>
+        <strong>Completed Forms:</strong> {{ completed_count }}<br>
+        <strong>Pending Forms:</strong> {{ pending_count }}<br>
+        <strong>Missing Forms:</strong> {{ missing_count }}<br>
+
+        <br>
+        <a href="{{ url_for('admin.edit_student', student_id=student.id) }}" class="btn btn-warning">Edit</a>
+        <a href="{{ url_for('admin.manage_students') }}" class="btn btn-secondary">Back to Student List</a>
+    </div>
+</div>
+
+{% endblock %}

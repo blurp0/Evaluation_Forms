@@ -1,0 +1,44 @@
+{% extends "student/base.html" %}
+
+{% block subtitle %}My Profile{% endblock %}
+
+{% block content %}
+
+<div class="profile-container">
+    <div class="profile-info">
+        <label>First Name:</label>
+        <span>{{ user.first_name }}</span>
+    </div>
+
+    <div class="profile-info">
+        <label>Last Name:</label>
+        <span>{{ user.last_name }}</span>
+    </div>
+
+    <div class="profile-info">
+        <label>Age:</label>
+        <span>{{ user.age }}</span>
+    </div>
+
+    <div class="profile-info">
+        <label>Email:</label>
+        <span>{{ user.email }}</span>
+    </div>
+
+        <!-- Display Course Information -->
+    <div class="profile-info">
+        <label>Course:</label>
+        <span>{{ course.name if course else 'No course assigned' }}</span>
+    </div>
+
+    <!-- Display Section Information -->
+    <div class="profile-info">
+        <label>Section:</label>
+        <span>{{ section.name if section else 'No section assigned' }}</span>
+    </div>
+
+
+    <button onclick="window.location.href='{{ url_for('student.edit_profile') }}'">Edit Profile</button>
+</div>
+
+{% endblock %}

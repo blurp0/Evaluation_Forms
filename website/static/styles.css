@@ -1,0 +1,350 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap");
+
+:root {
+    --header-height: 3rem;  /* Adjust this if your header height changes */
+    --nav-width: 68px;
+    --first-color: #9d94c3;
+    --first-color-light: #CBC5EA;
+    --white-color: #FFFFFF;
+    --grey-color: #73628A;
+    --dark-grey-color: #313D5A;
+    --body-font: 'Nunito', sans-serif;
+    --normal-font-size: 1rem;
+    --z-fixed: 100;
+}
+
+*, ::before, ::after {
+    box-sizing: border-box;
+}
+
+body {
+    position: relative;
+    margin: 0; /* Reset the margin */
+    padding: 0; /* Reset the padding */
+    font-family: var(--body-font);
+    font-size: var(--normal-font-size);
+    transition: .5s;
+    padding-top: var(--header-height);  /* Adds space for the top navbar */
+}
+
+a {
+    text-decoration: none;
+}
+
+.header {
+    width: 100%;
+    height: var(--header-height);
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1rem;
+    background-color: var(--first-color);
+    z-index: var(--z-fixed);
+    transition: .5s;
+}
+
+.header_toggle {
+    color: var(--white-color);
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.l-navbar {
+    position: fixed;
+    top: 0;
+    left: -30%;
+    width: var(--nav-width);
+    height: 100vh;
+    background-color: var(--dark-grey-color);
+    padding: .5rem 1rem 0 0;
+    transition: .5s;
+    z-index: var(--z-fixed);
+}
+
+.nav {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+}
+.nav_list {
+    flex: 1;
+    overflow-y: auto;  /* Make the navbar scrollable if content overflows */
+    max-height: calc(75vh - var(--header-height));  /* Ensure the navbar does not exceed the screen height */
+}
+
+.nav_logo, .nav_link {
+    display: grid;
+    grid-template-columns: max-content max-content;
+    align-items: center;
+    column-gap: 1rem;
+    padding: .5rem 0 .5rem 1.5rem;
+
+}
+
+.nav_link {
+    font-size: 0.875rem;  /* Smaller text size for the nav links */
+}
+
+.nav_logo {
+    margin-bottom: 2rem;
+    text-decoration: none;
+}
+
+.nav_logo-icon {
+    font-size: 1.25rem;
+    color: var(--white-color);
+}
+
+.nav_logo-name {
+    color: var(--white-color);
+    font-weight: 700;
+}
+
+.nav_link {
+    position: relative;
+    color: var(--white-color);
+    margin-bottom: 1.5rem;
+    transition: .3s;
+}
+
+.nav_link:hover {
+    color: var(--white-color);
+}
+
+.nav_icon {
+    font-size: 1.25rem;
+}
+
+.show {
+    left: 0;
+}
+
+.body-pd {
+    padding-left: calc(var(--nav-width) + 1rem);
+}
+
+.active {
+    color: var(--white-color);
+}
+
+.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 2px;
+    height: 32px;
+    background-color: var(--white-color);
+}
+
+.height-100 {
+   min-height: calc(100vh - var(--header-height));
+   z-index: var(--z-fixed);
+
+}
+
+/* For mobile, adjust padding and font size */
+@media screen and (max-width: 768px) {
+    .nav_link {
+        padding: .5rem 1rem;
+    }
+
+    .nav_icon {
+        font-size: 1.2rem;  /* Reduce icon size */
+    }
+
+    .nav_logo-name {
+        display: none;  /* Hide the name for small screens */
+    }
+}
+
+/* Fix the main content to be below the fixed navbar */
+.bg-light {
+    margin-top: var(--header-height);  /* Adds margin top to push content below the navbar */
+    padding: 1rem;  /* Optional padding for content */
+}
+
+@media screen and (min-width: 768px) {
+    body {
+        margin: 0;
+        padding-left: calc(var(--nav-width) + 2rem);
+    }
+
+    .header {
+        height: calc(var(--header-height) + 1rem);
+        padding: 0 2rem 0 calc(var(--nav-width) + 2rem);
+    }
+
+    .header_img {
+        width: 40px;
+        height: 40px;
+    }
+
+    .header_img img {
+        width: 45px;
+    }
+
+    .l-navbar {
+        left: 0;
+        padding: 1rem 1rem 0 0;
+    }
+
+    .show {
+        width: calc(var(--nav-width) + 180px);
+    }
+
+    .body-pd {
+        padding-left: calc(var(--nav-width) + 188px);
+    }
+}
+/* Table Styling */
+table {
+    width: 100%;  /* Ensure the table takes up the full width of its container */
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: var(--first-color);
+    border-radius: 8px;  /* Rounded corners for table */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    border: 1px solid #ddd;  /* Border to make the box more visible */
+    word-wrap: break-word;
+}
+
+/* Header Styling */
+th, td {
+    padding: 12px 15px;
+    text-align: center;
+    font-size: 1rem;
+    color: var(--dark-grey-color);
+}
+
+th {
+    color: var(--white-color);
+    font-weight: 600;
+    text-transform: uppercase;
+    background-color: var(--first-color);
+}
+
+/* Styling for table cells (td) */
+td {
+    background-color: var(--white-color); /* Set all rows to white */
+    border-bottom: 1px solid #ddd;
+}
+
+/* Remove alternating row color */
+tbody tr:nth-child(odd), tbody tr:nth-child(even) {
+    background-color: var(--white-color); /* All rows will have white background */
+}
+
+
+/* Hover effect on rows */
+tr:hover td {
+    background-color: var(--first-color); /* Slight darkening on hover */
+    color: var(--white-color);
+}
+
+/* Accordion Body Styling */
+
+/* Ensure accordion body fills up space when expanded */
+.accordion-collapse.show {
+    height: auto; /* Let the content inside dictate the height */
+    min-height: 200px;  /* Minimum height for the expanded accordion (you can adjust this value) */
+    padding: 20px;  /* Padding for the content to give it space */
+    width: 100%
+}
+
+.accordion-body {
+    width: 100%;
+    padding: 20px;  /* Padding around the table to create space and make it look like a box */
+    background-color: var(--first-color-light); /* Light background inside the accordion */
+    border-radius: 8px; /* Rounded corners for the body */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Light shadow for depth */
+    margin-top: 10px;  /* Space between accordion header and body */
+    overflow-x: auto;  /* Horizontal scrolling on small screens */
+}
+
+/* Ensure table fills the width of the accordion */
+.accordion-item {
+    margin-bottom: 1rem;  /* Space between accordion items */
+}
+
+/* Table Container */
+.table-container {
+    width: 100%;
+    margin: 0 auto;  /* Center the table within the container */
+}
+
+/* Responsive Table */
+@media (max-width: 1200px) {
+    .table-container {
+        margin: 0 15px;  /* Adjust margins for medium to large screens */
+    }
+}
+
+@media (max-width: 768px) {
+    table {
+        font-size: 0.9rem;  /* Slightly smaller text for small screens */
+    }
+    .table-container {
+        margin: 0 10px;  /* Adjust margins for smaller screens */
+    }
+}
+
+.modal {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    z-index: 1050;
+    overflow: hidden;
+}
+
+/* Ensure there's only one backdrop */
+.modal-backdrop {
+    z-index: 1040 !important;/* Adjust the backdrop z-index if needed */
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+}
+
+/* Remove extra backdrop if you don't want it showing up multiple times */
+.modal-backdrop.fade.show {
+    display: block;
+}
+
+
+
+/* Responsive Modal on Smaller Screens */
+@media (max-width: 768px) {
+    .modal {
+        width: 100%; /* Ensure modal takes full width on smaller screens */
+    }
+}
+
+
+<style>
+  #contentToDownload {
+      width: 800px; /* Fixed width for the content */
+      margin: 0 auto; /* Center the content horizontally */
+      padding: 20px; /* Add some padding for aesthetics */
+      box-sizing: border-box; /* Ensure padding doesn't affect the width */
+      background-color: white; /* Set background color */
+  }
+
+  #contentToDownload * {
+      max-width: 100%; /* Prevent content from overflowing */
+  }
+
+  /* Optional: Disable responsive behavior for tables and charts */
+  table, canvas {
+      width: 100% !important;
+      height: auto !important;
+  }
+</style>

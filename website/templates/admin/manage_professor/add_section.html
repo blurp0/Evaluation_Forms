@@ -1,0 +1,14 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+    <h2>Add Section to {{ course.name }}</h2>
+
+    <form method="POST">
+        <div class="mb-3">
+            <label for="name" class="form-label">Section Name</label>
+            <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+        <input type="hidden" name="professor_id" value="{{ professor_id }}">
+        <button type="submit" class="btn btn-success">Add Section</button>
+    </form>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "student/base.html" %}
+
+{% block subtitle %}Edit Profile{% endblock %}
+
+{% block content %}
+<h1>Edit Your Profile</h1>
+
+<form action="{{ url_for('student.edit_profile') }}" method="POST">
+    <!-- First Name -->
+    <div class="form-group">
+        <label for="first_name">First Name:</label>
+        <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}" required>
+    </div>
+
+    <!-- Last Name -->
+    <div class="form-group">
+        <label for="last_name">Last Name:</label>
+        <input type="text" id="last_name" name="last_name" value="{{ user.last_name }}" required>
+    </div>
+
+    <!-- Age -->
+    <div class="form-group">
+        <label for="age">Age:</label>
+        <input type="number" id="age" name="age" value="{{ user.age }}" required>
+    </div>
+
+    <!-- Email -->
+    <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" value="{{ user.email }}" required>
+    </div>
+
+    <button type="submit">Save Changes</button>
+    <button type="button" onclick="window.history.back()">Cancel</button>
+</form>
+
+{% endblock %}

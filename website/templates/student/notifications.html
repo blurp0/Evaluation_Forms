@@ -1,0 +1,13 @@
+{% extends "student/base.html" %}
+{% block subtitle %}Notifications{% endblock %}
+{% block content %}
+
+<ul class="notifications-list">
+    {% for notification in notifications %}
+    <li>
+        <span class="notification-date">{{ notification.date }}</span>
+        <p class="notification-message">{{ notification.message }}</p>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}
